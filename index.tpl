@@ -28,13 +28,11 @@
         tooltip: {
             formatter: function() {
                 var s;
-
-                if (this.point.name) {
-                    s = ''+
-                        this.point.name +': '+ this.y +'元';
-                } else {
-                    s = ''+
-                        this.series.name  +': '+ this.y + '元';
+                if(this.point.name){
+                  s = '' + this.point.name+ ': '+this.y + '元';
+                }
+                else{
+                  s = ''+ this.series.name  +': '+ this.y + '元';
                 }
                 return s;
             }
@@ -52,11 +50,66 @@
         plotOptions: {
             column: {
                 pointPadding: 0.2,
-                borderWidth: 0
+                borderWidth: 0,
             },
+            spline: {
+                    cursor: 'pointer',
+                    point:{
+                        events:{
+                            click:function(e){
+                              window.location.href=this.series.userOptions.ownURL[this.x];
+                            }
+                        }
+                    }
+            },
+            pie: {
+                allowPointSelect: false,
+                showInLegend: false,
+                cursor: 'pointer',
+                center:[100,0],
+                size:100,
+                dataLabels: {
+                    enabled: false,
+                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                    style: {
+                        color: "black",
+                    }
+                }
+            }
         },
-        series: {{!config}}
-    });
+        series: [
+        // columns charts data
+        % for _type,data in columnChartsData.iteritems():
+          {
+            "type":"column",
+            "name":"{{!columnChartsNames[_type]}}",
+            "data":{{!data}},
+          },
+        % end 
+        // line charts configs
+        {
+          "marker": {
+            "lineWidth": 3,
+          },
+          "data": {{!lineChartsData}},
+          "ownURL":{{!lineChartsDataUrl}},
+          "type": "spline",
+          "name": {{!lineChartsName}},
+        },
+        // pie charts configs,this.point.options.ownURL
+        {
+          "type": "pie",
+          "data":[
+          % for idx,item in enumerate(pieChartsData):
+          {
+            "y": {{item}},
+            "name": "{{!pieChartsName[idx]}}"
+          },
+          %end
+          ]
+        }
+      ]
+    })
 });
 //]]>
   </script>
